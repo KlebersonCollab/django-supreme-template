@@ -59,9 +59,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/kleberson/django-supreme-template"
-Repository = "https://github.com/kleberson/django-supreme-template"
-"Bug Tracker" = "https://github.com/kleberson/django-supreme-template/issues"
+Homepage = "https://github.com/KlebersonCollab/django-supreme-template"
+Repository = "https://github.com/KlebersonCollab/django-supreme-template"
+"Bug Tracker" = "https://github.com/KlebersonCollab/django-supreme-template/issues"
 
 [tool.ruff]
 line-length = 100
