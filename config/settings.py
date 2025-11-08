@@ -407,10 +407,10 @@ JAZZMIN_SETTINGS = {
     "user_avatar": None,
     "topmenu_links": [
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
-        {"name": "API Docs", "url": "/api/docs/", "new_window": True},
+        {"name": "API Docs", "url": "/api/schema/swagger-ui/", "new_window": True},
     ],
     "usermenu_links": [
-        {"name": "API Docs", "url": "/api/docs/", "new_window": True},
+        {"name": "API Docs", "url": "/api/schema/swagger-ui/", "new_window": True},
     ],
     "show_sidebar": True,
     "navigation_expanded": True,
@@ -432,8 +432,10 @@ JAZZMIN_SETTINGS = {
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
         "account.EmailAddress": "fas fa-envelope",
+        "socialaccount.SocialApp": "fas fa-share-alt",
         "socialaccount.SocialAccount": "fas fa-share-alt",
         "socialaccount.SocialToken": "fas fa-key",
+        "sites.Site": "fas fa-globe",
     },
     "default_icon_parents": "fas fa-chevron-circle-right",
     "default_icon_children": "fas fa-circle",
