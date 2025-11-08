@@ -56,19 +56,66 @@ Edit `.env` and set your `DJANGO_SECRET_KEY` for production.
 uv run python manage.py migrate
 ```
 
-### 4. Create Superuser
+This will create all necessary database tables.
+
+### 4. Verify System
+
+```bash
+uv run python manage.py check
+```
+
+This verifies that your project is properly configured.
+
+### 5. Create Superuser
 
 ```bash
 uv run python manage.py createsuperuser
 ```
 
-### 5. Run Development Server
+Follow the prompts to create an admin user. Alternatively, you can create a superuser non-interactively:
+
+```bash
+uv run python manage.py createsuperuser --noinput --username admin --email admin@example.com
+```
+
+Then set the password:
+
+```bash
+uv run python manage.py changepassword admin
+```
+
+### 6. Run Development Server
 
 ```bash
 uv run python manage.py runserver
 ```
 
+Or to make it accessible from other devices on your network:
+
+```bash
+uv run python manage.py runserver 0.0.0.0:8000
+```
+
 Visit `http://127.0.0.1:8000/` to see your Django application.
+
+## Available URLs
+
+Once the server is running, you can access:
+
+### Admin & Portal
+- **Admin Panel (Jazzmin)**: http://127.0.0.1:8000/admin/
+- **SSO Portal**: http://127.0.0.1:8000/accounts/
+
+### API Documentation
+- **Swagger UI**: http://127.0.0.1:8000/api/schema/swagger-ui/
+- **ReDoc**: http://127.0.0.1:8000/api/schema/redoc/
+- **OpenAPI Schema**: http://127.0.0.1:8000/api/schema/
+
+### API Endpoints
+- **JWT Token**: http://127.0.0.1:8000/api/token/
+- **SSO Mobile**: http://127.0.0.1:8000/api/sso/authenticate/
+- **User Info**: http://127.0.0.1:8000/api/user/
+- **Health Check**: http://127.0.0.1:8000/api/health/
 
 ## Features
 
@@ -189,8 +236,24 @@ uv run python manage.py makemigrations
 # Apply migrations
 uv run python manage.py migrate
 
+# Verify system configuration
+uv run python manage.py check
+
 # Access Django shell
 uv run python manage.py shell
+```
+
+### User Management
+
+```bash
+# Create superuser (interactive)
+uv run python manage.py createsuperuser
+
+# Create superuser (non-interactive)
+uv run python manage.py createsuperuser --noinput --username admin --email admin@example.com
+
+# Change user password
+uv run python manage.py changepassword <username>
 ```
 
 ## Configuration
