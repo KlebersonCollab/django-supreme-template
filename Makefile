@@ -34,13 +34,30 @@ makemigrations: ## Create database migrations
 	uv run python manage.py makemigrations
 
 runserver: ## Run development server
-	uv run python manage.py runserver
+	uv run python manage.py runserver 0.0.0.0:8000
+
+setup-social-apps: ## Setup social applications from environment variables
+	@if [ -f .env ]; then \
+		export $$(cat .env | grep -v '^#' | xargs) && \
+		uv run python manage.py shell -c "exec(open('config/setup_social_apps.py').read())"; \
+	else \
+		echo "⚠️  Arquivo .env não encontrado. Crie um arquivo .env baseado em .env.example"; \
+	fi
 
 shell: ## Open Django shell
 	uv run python manage.py shell
 
+stopserver: ## Stop Django server
+	pkill -f "python manage.py runserver 0.0.0.0:8000"
+
 superuser: ## Create superuser
-	uv run python manage.py createsuperuser
+	uv run python manage.py createsuperuser --noinput --username admin --email admin@example.com
+
+changepassword: ## Change user password
+	uv run python manage.py changepassword admin
+
+resetpassword: ## Reset user password
+	uv run python manage.py reset_password admin
 
 collectstatic: ## Collect static files
 	uv run python manage.py collectstatic --noinput

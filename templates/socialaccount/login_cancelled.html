@@ -1,0 +1,25 @@
+{% extends "registration/base.html" %}
+
+{% load i18n jazzmin %}
+{% get_jazzmin_settings request as jazzmin_settings %}
+{% get_jazzmin_ui_tweaks as jazzmin_ui %}
+
+{% block head_title %}{% trans "Login Cancelled" %}{% endblock %}
+
+{% block content %}
+    <p class="login-box-msg">{% trans "Login Cancelled" %}</p>
+    
+    <div class="callout callout-warning">
+        <p>
+            {% url 'account_login' as login_url %}
+            {% blocktrans %}You decided to cancel logging in to our site using one of your existing accounts. If this was a mistake, please proceed to <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}
+        </p>
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'account_login' %}" class="btn {{ jazzmin_ui.button_classes.primary }}">
+            {% trans "Back to login" %}
+        </a>
+    </div>
+{% endblock %}
+

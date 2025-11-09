@@ -30,10 +30,26 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
+from config.admin_views import admin_login_redirect
 from config.api_views import api_health_check, api_user_info
 from config.sso_auth import sso_authenticate
 
+# Configurar o Django Admin para usar nossa view de redirecionamento
+# Isso substitui a view padrão do admin e evita loops
+admin.site.login = admin_login_redirect
+# IMPORTANTE: Configurar login_url para que o admin use LOGIN_URL ao redirecionar
+# Isso evita que o admin redirecione para /admin/login/ em vez de usar LOGIN_URL
+# O Django Admin usa login_url quando redireciona usuários não autenticados
+try:
+    admin.site.login_url = "/accounts/login/"
+except AttributeError:
+    # Se login_url não for um atributo configurável, vamos usar outra abordagem
+    pass
+
 urlpatterns = [
+    # Admin login redirect (unifica com Allauth)
+    # Esta rota é interceptada pelo admin.site.login acima, mas mantemos para compatibilidade
+    path("admin/login/", admin_login_redirect, name="admin_login_redirect"),
     # Admin
     path("admin/", admin.site.urls),
     # Django Allauth (SSO) - Portal authentication

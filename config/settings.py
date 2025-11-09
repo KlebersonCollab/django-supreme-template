@@ -78,6 +78,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",  # Required for allauth
+    # Project apps (must be before third-party apps for template tags)
+    "config",  # Project config app (for template tags)
     # Third-party apps
     "corsheaders",  # CORS support
     "rest_framework",
@@ -113,7 +115,7 @@ SITE_ID = int(os.environ.get("SITE_ID", "1"))
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -392,6 +394,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # JAZZMIN CONFIGURATION
 # =============================================================================
 
+def get_user_avatar_url(user):
+    """
+    Callable function for Jazzmin user_avatar setting.
+    Returns avatar URL from social account if available.
+    """
+    from config.templatetags.user_avatar import get_social_avatar_url
+    avatar_url = get_social_avatar_url(user)
+    if avatar_url:
+        return avatar_url
+    # Return None to use Jazzmin's default avatar
+    return None
+
+
 JAZZMIN_SETTINGS = {
     "site_title": "Django Template Admin",
     "site_header": "Django Template",
@@ -404,7 +419,7 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "Bem-vindo ao Django Template Admin",
     "copyright": "Django Template",
     "search_model": ["auth.User", "auth.Group"],
-    "user_avatar": None,
+    "user_avatar": get_user_avatar_url,  # Callable function that returns avatar URL from social account
     "topmenu_links": [
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
         {"name": "API Docs", "url": "/api/schema/swagger-ui/", "new_window": True},
@@ -413,20 +428,20 @@ JAZZMIN_SETTINGS = {
         {"name": "API Docs", "url": "/api/schema/swagger-ui/", "new_window": True},
     ],
     "show_sidebar": True,
-    "navigation_expanded": True,
+    "navigation_expanded": False,
     "hide_apps": [],
     "hide_models": [],
     "order_with_respect_to": ["auth", "account", "socialaccount"],
-    "custom_links": {
-        "books": [
-            {
-                "name": "Make Messages",
-                "url": "make_messages",
-                "icon": "fas fa-comments",
-                "permissions": ["books.view_book"],
-            }
-        ]
-    },
+        "custom_links": {
+            "books": [
+                {
+                    "name": "Make Messages",
+                    "url": "make_messages",
+                    "icon": "fas fa-comments",
+                    "permissions": ["books.view_book"],
+                }
+            ]
+        },
     "icons": {
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
@@ -439,7 +454,9 @@ JAZZMIN_SETTINGS = {
     },
     "default_icon_parents": "fas fa-chevron-circle-right",
     "default_icon_children": "fas fa-circle",
-    "related_modal_active": False,
+    
+    "related_modal_active": True,
+
     "custom_css": None,
     "custom_js": None,
     "use_google_fonts_cdn": True,
@@ -449,38 +466,43 @@ JAZZMIN_SETTINGS = {
         "auth.user": "collapsible",
         "auth.group": "vertical_tabs",
     },
+    "language_chooser": False,
 }
 
+#Necessário para habilitar o Modal
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 JAZZMIN_UI_TWEAKS = {
-    "navbar_small_text": False,
-    "footer_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": "navbar-primary",
-    "accent": "accent-primary",
-    "navbar": "navbar-dark",
-    "no_navbar_border": False,
-    "navbar_fixed": False,
+    "navbar_small_text": True,
+    "footer_small_text": True,
+    "body_small_text": True,
+    "brand_small_text": True,
+    "brand_colour": "navbar-white",
+    "accent": "accent-orange",
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": True,
+    "navbar_fixed": True,
     "layout_boxed": False,
     "footer_fixed": False,
-    "sidebar_fixed": False,
-    "sidebar": "sidebar-dark-primary",
-    "sidebar_nav_small_text": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-light-orange",
+    "sidebar_nav_small_text": True,
     "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
+    "sidebar_nav_child_indent": True,
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
-    "theme": "default",
-    "dark_mode_theme": None,
+    "theme": "united",
+    "dark_mode_theme": False,
     "button_classes": {
         "primary": "btn-primary",
         "secondary": "btn-secondary",
         "info": "btn-info",
         "warning": "btn-warning",
         "danger": "btn-danger",
-        "success": "btn-success",
+        "success": "btn-success"
     },
+    "actions_sticky_top": True
 }
 
 # =============================================================================
@@ -550,7 +572,8 @@ ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION", "optional")
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_ADAPTER = "allauth.account.adapter.DefaultAccountAdapter"
+ACCOUNT_ALLOW_REGISTRATION = True  # Permitir registro de novos usuários
+ACCOUNT_ADAPTER = "config.custom_account_adapter.CustomAccountAdapter"
 ACCOUNT_FORMS = {}
 
 # Social account settings
@@ -558,8 +581,13 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = "optional"
 SOCIALACCOUNT_QUERY_EMAIL = True
-SOCIALACCOUNT_ADAPTER = "allauth.socialaccount.adapter.DefaultSocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "config.custom_social_adapter.CustomSocialAccountAdapter"
 SOCIALACCOUNT_FORMS = {}
+
+# Allauth CSRF settings
+# OAuth callbacks are GET requests, but some Allauth views use POST
+# Ensure CSRF is properly configured for OAuth flows
+ACCOUNT_EMAIL_VERIFICATION = "optional"  # Reduce POST requests during signup
 
 # Social account providers configuration
 SOCIALACCOUNT_PROVIDERS = {
@@ -599,10 +627,18 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 # Login/Logout URLs
-LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
+# Unificado: /admin/login/ redireciona para /accounts/login/
+# Isso permite usar todas as funcionalidades do Allauth (signup, email login, OAuth)
+LOGIN_URL = "/accounts/login/"  # Rota principal de login (Allauth)
+LOGIN_REDIRECT_URL = "/admin/"  # Após login, vai para admin
+LOGOUT_REDIRECT_URL = "/accounts/login/"  # Após logout, volta para login
 ACCOUNT_LOGOUT_ON_GET = True
+
+# Allauth redirect URLs (for social login)
+# IMPORTANTE: O Allauth usa o parâmetro ?next= se fornecido, caso contrário usa estas URLs
+# Definimos como /admin/ para que após login sem ?next=, vá para o admin
+ACCOUNT_LOGIN_REDIRECT_URL = "/admin/"  # Após login Allauth, vai para admin (se não houver ?next=)
+SOCIALACCOUNT_LOGIN_REDIRECT_URL = "/admin/"  # Após OAuth, vai para admin (se não houver ?next=)
 
 # =============================================================================
 # CORS CONFIGURATION
@@ -639,7 +675,17 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_ALL_ORIGINS = os.environ.get("CORS_ALLOW_ALL_ORIGINS", "False") == "True"
 
 # CSRF trusted origins (should match CORS origins for POST requests)
-CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()
+CSRF_TRUSTED_ORIGINS = list(CORS_ALLOWED_ORIGINS) + [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+# CSRF settings for development
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript access for some frameworks
+CSRF_USE_SESSIONS = False  # Use cookie-based CSRF tokens
+CSRF_COOKIE_SAMESITE = "Lax"  # Allow CSRF cookie to be sent in cross-site requests for OAuth
+CSRF_COOKIE_DOMAIN = None  # Allow CSRF cookie for localhost
 
 # =============================================================================
 # SECURITY HEADERS

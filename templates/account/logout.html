@@ -1,0 +1,36 @@
+{% extends "registration/base.html" %}
+
+{% load i18n jazzmin %}
+{% get_jazzmin_settings request as jazzmin_settings %}
+{% get_jazzmin_ui_tweaks as jazzmin_ui %}
+
+{% block head_title %}{% trans "Sign Out" %}{% endblock %}
+
+{% block content %}
+    <p class="login-box-msg">{% trans "Sign Out" %}</p>
+    
+    <div class="callout callout-info">
+        <p>{% trans "Are you sure you want to sign out?" %}</p>
+    </div>
+
+    <form method="post" action="{% url 'account_logout' %}">
+        {% csrf_token %}
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+        <div class="row">
+            <div class="col-12">
+                <button type="submit" class="btn {{ jazzmin_ui.button_classes.danger }} btn-block">
+                    {% trans "Sign Out" %}
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'admin:index' %}" class="text-center">
+            {% trans "Cancel" %}
+        </a>
+    </div>
+{% endblock %}
+

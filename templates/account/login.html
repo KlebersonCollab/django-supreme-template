@@ -1,0 +1,105 @@
+{% extends "registration/base.html" %}
+
+{% load i18n jazzmin %}
+{% get_jazzmin_settings request as jazzmin_settings %}
+{% get_jazzmin_ui_tweaks as jazzmin_ui %}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+{% block content %}
+    <p class="login-box-msg">{{ jazzmin_settings.welcome_sign }}</p>
+    
+    {% if form.errors %}
+        <div class="callout callout-danger">
+            {% for field in form %}
+                {% if field.errors %}
+                    <p>{{ field.label }}: {{ field.errors|join:', ' }}</p>
+                {% endif %}
+            {% endfor %}
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <form class="login" method="POST" action="{% url 'account_login' %}">
+        {% csrf_token %}
+        
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+
+        <div class="input-group mb-3">
+            <input type="text" name="login" class="form-control" placeholder="{% trans 'Username or email' %}" required autofocus>
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-user"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group mb-3">
+            <input type="password" name="password" class="form-control" placeholder="{% trans 'Password' %}" required>
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-lock"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-8">
+                <div class="icheck-primary">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">
+                        {% trans "Remember me" %}
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <button type="submit" class="btn {{ jazzmin_ui.button_classes.primary }} btn-block">
+                    {% trans "Sign In" %}
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
+    </div>
+
+    {% if ACCOUNT_ALLOW_REGISTRATION %}
+        <div class="text-center mt-2">
+            <a href="{% url 'account_signup' %}" class="text-center">
+                {% trans "Don't have an account? Sign up" %}
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Social Authentication -->
+    {% load socialaccount social_providers %}
+    {% get_unique_providers as socialaccount_providers %}
+    {% if socialaccount_providers %}
+        <div class="social-auth-links text-center mt-4 mb-3">
+            <p class="text-muted mb-2">{% trans 'Or sign in with' %}</p>
+            
+            {% comment %}Renderiza dinamicamente todos os providers configurados{% endcomment %}
+            {% for provider in socialaccount_providers %}
+                {% get_provider_button_class provider.id as button_class %}
+                {% get_provider_icon provider.id as provider_icon %}
+                <div class="col-12 mb-2">
+                    <a href="/accounts/{{ provider.id }}/login/" class="btn btn-block {% if button_class == 'danger' %}{{ jazzmin_ui.button_classes.danger }}{% elif button_class == 'dark' %}{{ jazzmin_ui.button_classes.dark }}{% elif button_class == 'info' %}{{ jazzmin_ui.button_classes.info }}{% else %}{{ jazzmin_ui.button_classes.primary }}{% endif %}">
+                        <i class="{{ provider_icon }}"></i>
+                        {% blocktrans with provider_name=provider.name %}Sign in with {{ provider_name }}{% endblocktrans %}
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
+

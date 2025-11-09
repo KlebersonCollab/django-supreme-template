@@ -1,0 +1,46 @@
+{% extends "registration/base.html" %}
+
+{% load i18n jazzmin %}
+{% get_jazzmin_settings request as jazzmin_settings %}
+{% get_jazzmin_ui_tweaks as jazzmin_ui %}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+{% block content %}
+    <p class="login-box-msg">{{ jazzmin_settings.welcome_sign }}</p>
+    
+    {% if process == "connect" %}
+        <div class="callout callout-info">
+            <p>
+                {% blocktrans with provider.name as provider %}You are about to connect a new third party account from {{ provider }}.{% endblocktrans %}
+            </p>
+        </div>
+    {% else %}
+        <div class="callout callout-info">
+            <p>
+                {% blocktrans with provider.name as provider %}You are about to sign in using a third party account from {{ provider }}.{% endblocktrans %}
+            </p>
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+        <div class="row">
+            <div class="col-12">
+                <button type="submit" class="btn {{ jazzmin_ui.button_classes.primary }} btn-block">
+                    {% trans "Continue" %}
+                </button>
+            </div>
+        </div>
+    </form>
+    
+    <div class="text-center mt-3">
+        <a href="{% url 'account_login' %}" class="text-center">
+            {% trans "Back to login" %}
+        </a>
+    </div>
+{% endblock %}
+

@@ -174,6 +174,18 @@ def get_or_create_user_from_sso(provider: str, user_data: dict) -> tuple[User, b
         last_name=user_data.get("family_name") or user_data.get("last_name") or "",
     )
 
+    # Adicionar ao grupo "Membro da equipe" por padrão
+    from django.contrib.auth.models import Group
+    try:
+        grupo_membro = Group.objects.get(name="Membro da equipe")
+        user.groups.add(grupo_membro)
+        logger.info(f"Usuário {user.username} adicionado ao grupo 'Membro da equipe' via SSO API")
+    except Group.DoesNotExist:
+        # Se o grupo não existir, criar automaticamente
+        grupo_membro = Group.objects.create(name="Membro da equipe")
+        user.groups.add(grupo_membro)
+        logger.info(f"Grupo 'Membro da equipe' criado e usuário {user.username} adicionado via SSO API")
+
     # Create social account
     SocialAccount.objects.create(
         user=user,

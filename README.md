@@ -127,6 +127,12 @@ Modern, responsive admin interface with customizable themes.
 - GitHub OAuth2
 - Microsoft OAuth2
 - Login/Register via `/accounts/`
+- **Authorization Callback URLs** configuradas automaticamente:
+  - Google: `/accounts/google/login/callback/`
+  - GitHub: `/accounts/github/login/callback/`
+  - Microsoft: `/accounts/microsoft/login/callback/`
+- **Setup automático**: Configure variáveis de ambiente e execute `make setup-social-apps`
+- Veja `docs/SSO_SETUP.md` para configuração completa
 
 ### 📱 SSO Authentication (Mobile Apps)
 Endpoint for mobile apps to authenticate with SSO tokens:

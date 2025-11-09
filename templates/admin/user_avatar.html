@@ -1,0 +1,8 @@
+{% load user_avatar %}
+
+{% get_user_avatar_url as avatar_url %}
+{% if avatar_url %}
+    <img src="{{ avatar_url }}" alt="{{ request.user.username|default:'User' }}" class="img-circle elevation-2" style="width: 32px; height: 32px; object-fit: cover; border: 2px solid rgba(255,255,255,0.2);" />
+{% else %}
+    <i class="fas fa-user-circle" style="font-size: 32px;"></i>
+{% endif %}
