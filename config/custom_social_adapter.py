@@ -59,6 +59,47 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         
         return apps
 
+    def pre_social_login(self, request, sociallogin):
+        """
+        Vincula conta social a usuário existente se o email corresponder.
+        
+        Este método é chamado ANTES de criar um novo usuário. Se encontrar
+        um usuário existente com o mesmo email, vincula a conta social a ele.
+        
+        Args:
+            request: HttpRequest object
+            sociallogin: SocialLogin instance
+        """
+        # Se o usuário já está associado, não fazer nada
+        if sociallogin.is_existing:
+            return
+        
+        # Obter email da conta social
+        email = sociallogin.email_addresses[0].email if sociallogin.email_addresses else None
+        if not email:
+            return
+        
+        # Tentar encontrar usuário existente com este email
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        try:
+            user = User.objects.get(email=email)
+            # Vincular a conta social ao usuário existente
+            sociallogin.connect(request, user)
+            logger.info(f"Conta social {sociallogin.account.provider} vinculada ao usuário existente {user.email}")
+        except User.DoesNotExist:
+            # Usuário não existe, permitir criação de novo usuário
+            pass
+        except User.MultipleObjectsReturned:
+            # Múltiplos usuários com mesmo email (não deveria acontecer com ACCOUNT_UNIQUE_EMAIL=True)
+            logger.warning(f"Múltiplos usuários encontrados com email {email}")
+            # Pegar o primeiro
+            user = User.objects.filter(email=email).first()
+            if user:
+                sociallogin.connect(request, user)
+                logger.info(f"Conta social {sociallogin.account.provider} vinculada ao primeiro usuário encontrado {user.email}")
+
     def is_open_for_signup(self, request, sociallogin):
         """
         Permite que novos usuários se registrem via OAuth.
