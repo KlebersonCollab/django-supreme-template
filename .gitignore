@@ -203,6 +203,7 @@ wheels/
 .installed.cfg
 *.egg
 
+django_supreme_template.egg-info
 # UV cache (but keep uv.lock - it should be committed!)
 .uv/
 logs/
